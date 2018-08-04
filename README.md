@@ -26,8 +26,16 @@ cd WatchServersDog
 
 2. 按照 server.txt.sample 的格式添加服务器，并改名为 server.txt
 
+    ```bash
+    e.g.
+    name:localhost; ip:127.0.0.1; psd:xxx
+    ```
+
     添加服务器信息有三个信息并且顺序为：名字（备注），IP 地址，密码（可选）
+
     名字和 IP 之后用半角分号`;`结束，密码则不用
+
+    若没有密码，则密码填 `null`
 
 3. 启动脚本（会随项目更新而更改入口）
 
