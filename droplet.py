@@ -14,17 +14,24 @@ class droplet(object):
         name, ip, password
     '''
     # set a limitation to droplet jest can have 3 attribution
-    __slot__ = ('__name', '__ip', '__password', 'information')
+    __slot__ = ('__name', '__ip', '__password', '__user', 'information')
 
-    def __init__(self, name, ip, password):
+    def __init__(self, name, ip, user, password):
         if isinstance(name, str):
             self.__name = name
         else:
             print('the name "', name, '" is not a str')
+
         if isinstance(ip, str):
             self.__ip = ip
         else:
             print('the ip "', ip, '" is not a str')
+
+        if isinstance(user, str):
+            self.__user = user
+        else:
+            print('the username "', user, '" is not a str')
+
         if isinstance(password, str):
             self.__password = password
         else:
@@ -47,11 +54,17 @@ class droplet(object):
         self.__ip = ip
 
     @property
+    def user(self):
+        return self.__user
+    
+    @user.setter
+    def user(self, user):
+        self.__user = user
+
+    @property
     def password(self):
         return self.__password
 
     @password.setter
     def password(self, password):
         self.__password = password
-
-    

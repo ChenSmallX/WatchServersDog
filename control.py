@@ -16,10 +16,13 @@ def get_server_info(strInfo):
     # get ip
     ip = strInfo[strInfo.index("ip:")+3:strInfo.index(";")]
     strInfo = strInfo[strInfo.index(";")+1:]
+    # get username
+    user = strInfo[strInfo.index("user:")+5:strInfo.index(";")]
+    strInfo = strInfo[strInfo.index(";")+1:]
     # get password
     password = strInfo[strInfo.index("psd:")+4:strInfo.index("\n")]
 
-    return name, ip, password
+    return name, ip, user, password
 
 
 def get_servers(f_servers):
@@ -27,8 +30,8 @@ def get_servers(f_servers):
 
     strInfo = f_servers.readline()
     while strInfo:
-        name, ip, password = get_server_info(strInfo)
-        tempDroplet = droplet(name, ip, password)
+        name, ip, user, password = get_server_info(strInfo)
+        tempDroplet = droplet(name, ip, user, password)
         servers.append(tempDroplet)
 
         strInfo = f_servers.readline()  # 这一步要求 servers.txt 文件要有最后一行空行
@@ -39,6 +42,7 @@ def get_servers(f_servers):
 def print_server(server):
     print(server.name)
     print(server.ip)
+    print(server.user)
     print(server.password)
 
 
