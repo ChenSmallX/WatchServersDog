@@ -49,7 +49,7 @@ def test_group_ping_once(servers):
         print(time)
 
 
-if __name__ == "__main__":
+def main():
     # Watch-Server-Dog/ (when debug, contact it before the path)
     f_servers = open("server.txt", "r")
     servers = get_servers(f_servers)
@@ -61,3 +61,7 @@ if __name__ == "__main__":
     test_group_ping_once(servers)
 
     f_servers.close()
+
+
+if __name__ == "__main__":
+    main()
