@@ -4,7 +4,14 @@
 
 class droplet(object):
     '''class to store information of server
+    initialization:
+        argument:
+            name(str), 
+            ip(str), 
+            password(str)
 
+    mathod:
+        name, ip, password
     '''
     # set a limitation to droplet jest can have 3 attribution
     __slot__ = ('__name', '__ip', '__password', 'information')
