@@ -4,6 +4,7 @@
 from pexpect import pxssh
 import getpass
 
+
 class droplet(object):
     '''class to store information of server
     initialization:
