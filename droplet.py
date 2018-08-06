@@ -121,9 +121,14 @@ def main():
     drop.login()
     if drop.is_connect:
         print(drop.name+" is connected")
+
+        commend = input("> ")
+        drop.connection.sendline(commend)
+        drop.connection.prompt()
+        print(drop.connection.before)
     else:
         print(drop.name+" is connect faired")
-    
+
     if drop.is_connect:
         if drop.logout():
             print(drop.name+" logout successed")
