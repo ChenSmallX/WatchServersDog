@@ -3,14 +3,15 @@
 
 from pexpect import pxssh
 import getpass
+import os
 
 
 class droplet(object):
     '''class to store information of server
     initialization:
         argument:
-            name(str), 
-            ip(str), 
+            name(str),
+            ip(str),
             password(str)
 
     mathod:
@@ -44,6 +45,7 @@ class droplet(object):
         # initialize advanced attributes
         self.__is_connect = False
         self.__connection = pxssh.pxssh()
+        self.__result = "null"
 
     @property
     def name(self):
@@ -64,7 +66,7 @@ class droplet(object):
     @property
     def user(self):
         return self.__user
-    
+
     @user.setter
     def user(self, user):
         self.__user = user
@@ -111,6 +113,38 @@ class droplet(object):
     def connection(self):
         return self.__connection
 
+    @property
+    def result(self):
+        return self.__result
+
+    def execute(self, commend):
+        if not self.__is_connect:
+            return False
+        else:
+            send_success = self.__connection.sendline(commend)
+            if send_success:
+                self.__connection.prompt()
+                result_line = self.__connection.before[len(commend)+2: -2]
+                self.__result = result_line
+                return True
+            else:
+                self.__result = "null"
+                return False
+
+    def ping(self):
+        ping_return_info = os.popen("ping "+self.__ip+" -c 1", "r")
+        queue = ping_return_info.readline()
+        queue = ping_return_info.readline()
+
+        try:
+            str_time = queue[queue.index("time=")+5: queue.index(" ms")]
+        except BaseException:
+            time = "timeout"
+        else:
+            time = float(str_time)
+
+        return time
+
 
 def main():
     ip = input("input ip: ")
@@ -123,17 +157,19 @@ def main():
         print(drop.name+" is connected")
 
         commend = input("> ")
-        drop.connection.sendline(commend)
-        drop.connection.prompt()
-        print(drop.connection.before)
+        if drop.execute(commend):
+            print("execute success")
+            print(drop.result)
+        else:
+            print("execute failed")
     else:
-        print(drop.name+" is connect faired")
+        print(drop.name+" is connect failed")
 
     if drop.is_connect:
         if drop.logout():
             print(drop.name+" logout successed")
         else:
-            print(drop.name+" id login, but logout faired")
+            print(drop.name+" id login, but logout failed")
     else:
         pass
 
