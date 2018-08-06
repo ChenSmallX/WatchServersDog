@@ -46,6 +46,8 @@ class droplet(object):
         self.__is_connect = False
         self.__connection = pxssh.pxssh()
         self.__result = "null"
+        self.__local = "null"
+        self.__isp = "null"
 
     @property
     def name(self):
@@ -83,6 +85,22 @@ class droplet(object):
     def is_connect(self):
         return self.__is_connect
 
+    @property
+    def connection(self):
+        return self.__connection
+
+    @property
+    def local(self):
+        return self.__local
+
+    @property
+    def isp(self):
+        return self.__isp
+
+    @property
+    def result(self):
+        return self.__result
+
     def login(self):
         if self.__is_connect:
             return True
@@ -93,7 +111,16 @@ class droplet(object):
                 password = self.__password
                 self.__connection.login(server=ip, username=user, password=password)
             except pxssh.ExceptionPxssh:
+                # this cause maybe cannot connect to server
+                # or wrong password
                 return False
+            except AssertionError:
+                '''one pxssh cannot login twice,and AssertionError
+                would be thouw out when login twice. so reconduct a
+                pxssh object can solve this problem
+                '''
+                self.__connection = pxssh.pxssh()
+                return self.login()
             else:
                 self.__is_connect = True
                 return True
@@ -107,15 +134,8 @@ class droplet(object):
             except OSError:
                 return False
             else:
+                self.__is_connect = False
                 return True
-
-    @property
-    def connection(self):
-        return self.__connection
-
-    @property
-    def result(self):
-        return self.__result
 
     def execute(self, commend):
         if not self.__is_connect:
@@ -145,11 +165,21 @@ class droplet(object):
 
         return time
 
+    def renew_location(self):
+        local_return_info = os.popen("curl cip.cc/"+self.__ip, "r")
+        str_temp_line = local_return_info.readline()
+
+        str_temp_line = local_return_info.readline()
+        self.__local = str_temp_line[str_temp_line.index(":")+2: -1]
+
+        str_temp_line = local_return_info.readline()
+        self.__isp = str_temp_line[str_temp_line.index(":")+2: -1]
+
 
 def main():
-    ip = input("input ip: ")
-    user = input("input user: ")
-    password = getpass.getpass("password: ")
+    ip = "172.247.33.219"  # input("input ip: ")
+    user = "root"  # input("input user: ")
+    password = "199801170208"  # getpass.getpass("password: ")
 
     drop = droplet("temp", ip, user, password)
     drop.login()
