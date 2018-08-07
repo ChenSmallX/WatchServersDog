@@ -10,14 +10,14 @@ def ping(server):
     argument: server (droplet class)
     return: time (would be a float or a s"timeout")
 
-    cause: The ping commend can return a series of 
+    cause: The ping commend can return a series of
     information about the network connection status
     to target server.
-    use the argument "-c" and attach one number 
-    after that can do the ping for a certain times 
+    use the argument "-c" and attach one number
+    after that can do the ping for a certain times
     of the number.
-    We get the 2nd line of the returned information 
-    (because the 1st line is a prompt) to extract the 
+    We get the 2nd line of the returned information
+    (because the 1st line is a prompt) to extract the
     time of ping.
     '''
     ping_info = os.popen("ping " + server.ip + " -c 1", "r")
@@ -37,11 +37,11 @@ def ping(server):
 
 
 def get_shell_size():
-    '''get lines and columns of current shell 
+    '''get lines and columns of current shell
     return: lines, columns
 
-    cause: In unix/linux shell, the commend "echo 
-    $LINES" and "echo $COLUMNS" can return the 
+    cause: In unix/linux shell, the commend "echo
+    $LINES" and "echo $COLUMNS" can return the
     size of this shell
     '''
     lines = int(os.popen("echo $LINES", "r").readline())
@@ -54,7 +54,7 @@ def get_location_info(server):
     argument: server (droplet class)
     return: location, isp
 
-    cause: post to "cip.cc" can return the information 
+    cause: post to "cip.cc" can return the information
     of the ip location which attach after the url
     '''
     str_info = os.popen("curl cip.cc/" + server.ip, "r")
