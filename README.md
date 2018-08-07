@@ -42,9 +42,9 @@ a bash script to monitor own servers or VPS base on python language which has a 
 
 3. 启动脚本（会随项目更新而更改入口）
 
-```bash
-python collector.py
-```
+    ```bash
+    python collector.py
+    ```
 
 ## 常见问题
 
