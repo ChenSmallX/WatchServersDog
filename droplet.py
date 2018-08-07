@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pexpect import pxssh
-import getpass
+# import getpass
 import os
 
 
@@ -17,6 +17,7 @@ class droplet(object):
     mathod:
         name, ip, password
     '''
+
     # set a limitation to droplet jest can have certain attributions
     # __slot__ = ('__name', '__ip', '__password', '__user', 'information')
 
@@ -48,6 +49,10 @@ class droplet(object):
         self.__result = "null"
         self.__local = "null"
         self.__isp = "null"
+        # preformance attributes
+        self.__total_ram = 0  # MB
+        self.__total_disk = 0  # GB
+        # self.__boot_time = "d days, m min"
 
     @property
     def name(self):
@@ -101,6 +106,18 @@ class droplet(object):
     def result(self):
         return self.__result
 
+    @property
+    def total_disk(self):
+        return self.__total_disk
+
+    @property
+    def total_ram(self):
+        return self.__total_ram
+
+    @property
+    def boot_time(self):
+        return self.boot_time
+
     def login(self):
         if self.__is_connect:
             return True
@@ -109,7 +126,8 @@ class droplet(object):
                 ip = self.__ip
                 user = self.__user
                 password = self.__password
-                self.__connection.login(server=ip, username=user, password=password)
+                self.__connection.login(
+                    server=ip, username=user, password=password)
             except pxssh.ExceptionPxssh:
                 # this cause maybe cannot connect to server
                 # or wrong password
@@ -144,7 +162,7 @@ class droplet(object):
             send_success = self.__connection.sendline(commend)
             if send_success:
                 self.__connection.prompt()
-                result_line = self.__connection.before[len(commend)+2: -2]
+                result_line = self.__connection.before[len(commend) + 2:-2]
                 self.__result = result_line
                 return True
             else:
@@ -152,12 +170,12 @@ class droplet(object):
                 return False
 
     def ping(self):
-        ping_return_info = os.popen("ping "+self.__ip+" -c 1", "r")
+        ping_return_info = os.popen("ping " + self.__ip + " -c 1", "r")
         queue = ping_return_info.readline()
         queue = ping_return_info.readline()
 
         try:
-            str_time = queue[queue.index("time=")+5: queue.index(" ms")]
+            str_time = queue[queue.index("time=") + 5:queue.index(" ms")]
         except BaseException:
             time = "timeout"
         else:
@@ -166,14 +184,58 @@ class droplet(object):
         return time
 
     def renew_location(self):
-        local_return_info = os.popen("curl cip.cc/"+self.__ip, "r")
+        local_return_info = os.popen("curl cip.cc/" + self.__ip, "r")
         str_temp_line = local_return_info.readline()
 
         str_temp_line = local_return_info.readline()
-        self.__local = str_temp_line[str_temp_line.index(":")+2: -1]
+        self.__local = str_temp_line[str_temp_line.index(":") + 2:-1]
 
         str_temp_line = local_return_info.readline()
-        self.__isp = str_temp_line[str_temp_line.index(":")+2: -1]
+        self.__isp = str_temp_line[str_temp_line.index(":") + 2:-1]
+
+    def __str__(self):
+        return str(self.__name + "\n" + self.__ip + "\n" + self.__user + "\n" +
+                   self.__password)
+
+    def cpu(self):
+        if not self.__is_connect:
+            return False
+        elif self.execute("uptime"):
+            uptime_info = str(self.result)
+            # self.__boot_time = uptime_info[uptime_info.index("up") + 3:
+            #                               uptime_info.index("min") + 3]
+            s_load = uptime_info[uptime_info.index("age:") + 5:-1]
+            ave1, ave5, ave15 = s_load[:-1].split(", ")
+            return ave1, ave5, ave15
+        else:
+            return False
+
+    def ram(self):
+        if not self.is_connect:
+            return False
+        elif self.execute("free"):
+            free_info = str(self.result)
+            free_info = free_info[free_info.index("Mem"):]
+            free_info = free_info[:free_info.index("\\r\\n")-7]
+            for i in range(1, 6):
+                free_info = free_info.replace("  ", " ")
+            l_free_info = free_info.split(" ")
+            self.__total_ram = int(l_free_info[1])
+            used = int(l_free_info[2])
+            # free = int(l_free_info[3])
+            return float(used)/float(self.__total_ram)
+        else:
+            return False
+
+    def disk_rank(self):
+        pass
+
+    def disk_io(self):
+        pass
+
+
+def testdrop():
+    return droplet("test", "192.210.171.35", "root", "199801170208")
 
 
 def main():
@@ -184,7 +246,7 @@ def main():
     drop = droplet("temp", ip, user, password)
     drop.login()
     if drop.is_connect:
-        print(drop.name+" is connected")
+        print(drop.name + " is connected")
 
         commend = input("> ")
         if drop.execute(commend):
@@ -193,13 +255,13 @@ def main():
         else:
             print("execute failed")
     else:
-        print(drop.name+" is connect failed")
+        print(drop.name + " is connect failed")
 
     if drop.is_connect:
         if drop.logout():
-            print(drop.name+" logout successed")
+            print(drop.name + " logout successed")
         else:
-            print(drop.name+" id login, but logout failed")
+            print(drop.name + " id login, but logout failed")
     else:
         pass
 
