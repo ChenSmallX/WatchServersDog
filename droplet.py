@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pexpect import pxssh
-# import getpass
+import getpass
 import os
 
 
@@ -234,14 +234,10 @@ class droplet(object):
         pass
 
 
-def testdrop():
-    return droplet("test", "192.210.171.35", "root", "199801170208")
-
-
 def main():
-    ip = "172.247.33.219"  # input("input ip: ")
-    user = "root"  # input("input user: ")
-    password = "199801170208"  # getpass.getpass("password: ")
+    ip = input("input ip: ")
+    user = input("input user: ")
+    password = getpass.getpass("password: ")
 
     drop = droplet("temp", ip, user, password)
     drop.login()
