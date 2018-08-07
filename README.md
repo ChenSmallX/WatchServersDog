@@ -7,12 +7,15 @@ a bash script to monitor own servers or VPS base on python language which has a 
 
 - 占用资源小
 - 只需要 Python3 就可以直接驱动
-- 使用的是 mac 的 shell 命令，所以应该可以在 linux 和 unix 上用，但是 windows 应该不行
-
+- ~~使用的是 mac 的 shell 命令，所以应该可以在 linux 和 unix 上用，但是 windows 应该不行~~
+- 改为使用 `pxssh` 模块进行远程登录，所以可以在 windows 上使用
 
 ## 功能
 
 - 测试服务器 ping 值
+- 测试服务器 cpu 占用
+- 测试服务器 ram 占用
+- 查询服务器所在地区、运营商的信息
 - coming soon...
 
 ## 使用方法
@@ -40,7 +43,7 @@ cd WatchServersDog
 3. 启动脚本（会随项目更新而更改入口）
 
 ```bash
-python control.py
+python collector.py
 ```
 
 ## 常见问题
