@@ -25,7 +25,8 @@ def get_server_info(strInfo):
     return name, ip, user, password
 
 
-def get_servers(f_servers):
+def get_servers(s_f_server):
+    f_servers = open(s_f_server, "r")
     servers = []
 
     strInfo = f_servers.readline()
@@ -36,14 +37,8 @@ def get_servers(f_servers):
 
         strInfo = f_servers.readline()  # 这一步要求 servers.txt 文件要有最后一行空行
 
+    f_servers.close()
     return servers
-
-
-def print_server(server):
-    print(server.name)
-    print(server.ip)
-    print(server.user)
-    print(server.password)
 
 
 def test_group_ping_once(servers):
@@ -55,16 +50,14 @@ def test_group_ping_once(servers):
 
 def main():
     # Watch-Server-Dog/ (when debug, contact it before the path)
-    f_servers = open("server.txt", "r")
-    servers = get_servers(f_servers)
+    servers = get_servers("server.txt")
 
     for ser in servers:
-        print_server(ser)
-        print("")
+        print(ser, end='\n\n')
 
-    test_group_ping_once(servers)
-
-    f_servers.close()
+    # test_group_ping_once(servers)
+    for ser in servers:
+        print(ser.name+":", ser.ping())
 
 
 if __name__ == "__main__":
