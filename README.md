@@ -22,10 +22,10 @@ a bash script to monitor own servers or VPS base on python language which has a 
 
 1. 克隆项目至本地
 
-```bash
-git clone https://github.com/ChenSmallX/WatchServersDog.git
-cd WatchServersDog
-```
+    ```bash
+    git clone https://github.com/ChenSmallX/WatchServersDog.git
+    cd WatchServersDog
+    ```
 
 2. 按照 server.txt.sample 的格式添加服务器，并改名为 server.txt
 
