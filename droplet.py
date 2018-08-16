@@ -21,7 +21,11 @@ class droplet(object):
     # set a limitation to droplet jest can have certain attributions
     # __slot__ = ('__name', '__ip', '__password', '__user', 'information')
 
-    def __init__(self, name, ip, user, password):
+    def __init__(self,
+                 name="localhost",
+                 ip="127.0.0.1",
+                 user="null",
+                 password="null"):
         # basic attributes
         if isinstance(name, str):
             self.__name = name
@@ -96,6 +100,8 @@ class droplet(object):
 
     @property
     def local(self):
+        if self.__local == "null":
+            self.renew_location()
         return self.__local
 
     @property
@@ -184,14 +190,18 @@ class droplet(object):
         return time
 
     def renew_location(self):
-        local_return_info = os.popen("curl cip.cc/" + self.__ip, "r")
-        str_temp_line = local_return_info.readline()
+        try:
+            local_return_info = os.popen("curl cip.cc/" + self.__ip, "r")
+            str_temp_line = local_return_info.readline()
 
-        str_temp_line = local_return_info.readline()
-        self.__local = str_temp_line[str_temp_line.index(":") + 2:-1]
+            str_temp_line = local_return_info.readline()
+            self.__local = str_temp_line[str_temp_line.index(":") + 2:-1]
 
-        str_temp_line = local_return_info.readline()
-        self.__isp = str_temp_line[str_temp_line.index(":") + 2:-1]
+            str_temp_line = local_return_info.readline()
+            self.__isp = str_temp_line[str_temp_line.index(":") + 2:-1]
+        except ValueError:
+            print("cannot get location infomation")
+            return False
 
     def __str__(self):
         return str(self.__name + "\n" + self.__ip + "\n" + self.__user + "\n" +
@@ -216,14 +226,14 @@ class droplet(object):
         elif self.execute("free"):
             free_info = str(self.result)
             free_info = free_info[free_info.index("Mem"):]
-            free_info = free_info[:free_info.index("\\r\\n")-7]
+            free_info = free_info[:free_info.index("\\r\\n") - 7]
             for i in range(1, 6):
                 free_info = free_info.replace("  ", " ")
             l_free_info = free_info.split(" ")
             self.__total_ram = int(l_free_info[1])
             used = int(l_free_info[2])
             # free = int(l_free_info[3])
-            return float(used)/float(self.__total_ram)
+            return float(used) / float(self.__total_ram)
         else:
             return False
 
@@ -234,32 +244,96 @@ class droplet(object):
         pass
 
 
-def main():
-    ip = input("input ip: ")
-    user = input("input user: ")
-    password = getpass.getpass("password: ")
-
-    drop = droplet("temp", ip, user, password)
-    drop.login()
+# function in main
+def main_login(drop):
     if drop.is_connect:
-        print(drop.name + " is connected")
-
-        commend = input("> ")
-        if drop.execute(commend):
-            print("execute success")
-            print(drop.result)
-        else:
-            print("execute failed")
+        print(drop.name, " is already login")
+        return True
+    elif drop.login():
+        print(drop.name, " connect success")
+        return True
     else:
-        print(drop.name + " is connect failed")
+        print(drop.name, " connect failed")
+        return False
 
+
+def main_logout(drop):
     if drop.is_connect:
         if drop.logout():
-            print(drop.name + " logout successed")
+            print(drop.name, " logout success")
+            return True
         else:
-            print(drop.name + " id login, but logout failed")
+            print(drop.name, " logout failed")
+            return False
     else:
-        pass
+        print(drop.name, " is already logout")
+        return True
+
+
+def main_ping(drop):
+    print("ping", drop.name, ":", drop.ping(), "ms")
+
+
+def main_info(drop):
+    print(drop.name, "basic infomation:")
+    print("ip: ", drop.ip)
+    print(drop.name, " locate in:\n", drop.local)
+
+
+def main():
+    droplets = []
+    input_mode = input("manual(1) file(2): ")
+    drop = droplet()
+
+    if input_mode == "1":
+        ip = input("input ip: ")
+        user = input("input user: ")
+        password = getpass.getpass("password: ")
+
+        drop = droplet("temp", ip, user, password)
+        droplets.append(drop)
+
+    elif input_mode == "2":
+        import reader
+        droplets = reader.get_servers("server.txt")
+        if len(droplets) == 0:
+            print("no server in file")
+            exit()
+
+        i = 1
+        for ser in droplets:
+            print(i, ":", ser.name)
+            i = i + 1
+        i = int(input("choose one: "))
+        # print(len(droplets))
+        if i < len(droplets)+1:
+            drop = droplets[i - 1]
+        else:
+            print("input error")
+            exit()
+
+    else:
+        print("input error")
+        exit()
+
+    while True:
+        print('1. login\n2. logout\n3. ping\n4. info\n0. exit')
+
+        commend = input("> ")
+        if commend == '\n':
+            continue
+        fun = {
+            '0': exit,
+            '1': main_login,
+            '2': main_logout,
+            '3': main_ping,
+            '4': main_info
+        }.get(commend)
+
+        if commend == '0':
+            exit(0)
+        else:
+            fun(drop)
 
 
 if __name__ == "__main__":
