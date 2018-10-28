@@ -1,8 +1,11 @@
 #!/anaconda3/bin/python python
 # -*- coding: utf-8 -*-
 
+# pxssh 封装了 ssh 登录的各种方法
 from pexpect import pxssh
+# getpass 是获取密码时候反显星号或者空格
 import getpass
+# os 模块可执行系统命令等等
 import os
 
 
@@ -26,42 +29,48 @@ class droplet(object):
                  ip="127.0.0.1",
                  user="null",
                  password="null"):
+                # 默认服务器为 localhost
+                # some thing to do: 加入参数【 ssh 端口】
         # basic attributes
-        if isinstance(name, str):
+        if isinstance(name, str):  # 检查 name 是否为字符串 string
             self.__name = name
         else:
             print('the name "', name, '" is not a str')
 
-        if isinstance(ip, str):
+        if isinstance(ip, str):  # 检查 ip 是否为字符串
             self.__ip = ip
         else:
             print('the ip "', ip, '" is not a str')
 
-        if isinstance(user, str):
+        if isinstance(user, str):  # 检查 user 是否为字符串
             self.__user = user
         else:
             print('the username "', user, '" is not a str')
 
-        if isinstance(password, str):
+        if isinstance(password, str):  # 检查 password 是否为字符串
             self.__password = password
         else:
             print('the password "', password, '" is not a str')
 
         # initialize advanced attributes
-        self.__is_connect = False
-        self.__connection = pxssh.pxssh()
-        self.__result = "null"
-        self.__local = "null"
-        self.__isp = "null"
+        self.__is_connect = False           # 是否链接 ssh 的 flag
+        self.__connection = pxssh.pxssh()   # 内置一个 pxssh 对象
+        self.__result = "null"              # pxssh 执行命令后的返回串
+        self.__local = "null"               # 所在地，由 curl cip.cc 获得
+        self.__isp = "null"                 # 同上
         # preformance attributes
-        self.__total_ram = 0  # MB
-        self.__total_disk = 0  # GB
+        self.__total_ram = 0  # MB          # 内存总量
+        self.__total_disk = 0  # GB         # 硬盘总量
         # self.__boot_time = "d days, m min"
 
+    # property 为修饰符，之后直接使用 drop.name 即可直接调用此方法
+    # python will call this method when user call the name attribute
     @property
     def name(self):
         return self.__name
 
+    # setter 同为修饰符，当对 drop.name 赋值的时候会调用此方法
+    # python will call this method when user set the value of name
     @name.setter
     def name(self, name):
         self.__name = name
@@ -124,7 +133,10 @@ class droplet(object):
     def boot_time(self):
         return self.boot_time
 
+    # 登录远程服务器方法
+    # the method which would be used to login the remote servers
     def login(self):
+        # 首先检查是否已经连上
         if self.__is_connect:
             return True
         elif not self.__is_connect:
@@ -142,25 +154,33 @@ class droplet(object):
                 '''one pxssh cannot login twice,and AssertionError
                 would be thouw out when login twice. so reconduct a
                 pxssh object can solve this problem
+                一个 pxssh 对象只能登录一次，若 logout 一个 pxssh 后，则
+                需要使用一个新的 pxssh 对象。
                 '''
                 self.__connection = pxssh.pxssh()
                 return self.login()
             else:
+                # 此时为 try 之间代码执行成功的情况
+                # code got this block, the code try successed
                 self.__is_connect = True
                 return True
 
+    # 登出远程服务器的方法
+    # the method which would be used to logout the remote servers
     def logout(self):
-        if not self.__is_connect:
-            return True
+        if not self.__is_connect:  # 检查是否连上
+            return True  # 没连上的，logout 直接返回 True
         elif self.__is_connect:
             try:
-                self.__connection.logout()
+                self.__connection.logout()  # 调用 pxssh 的 logout 可直接在远程 exit
             except OSError:
+                print("cause the OSError")
                 return False
             else:
                 self.__is_connect = False
                 return True
 
+    # 执行命令方法
     def execute(self, commend):
         if not self.__is_connect:
             return False
@@ -280,6 +300,23 @@ def main_info(drop):
     print(drop.name, " locate in:\n", drop.local)
 
 
+def main_exec(drop):
+    if drop.is_connect:
+        while True:
+            command = input(drop.name, " >> ", end='')
+            result = drop.exec(command)
+            if result:
+                print("execute succeed\nresult is:")
+                print(drop.result)
+                return True
+            else:
+                print("execute faild.")
+                return False
+    else:
+        print(drop.name, ' is not connected.')
+        return False
+
+
 def main():
     droplets = []
     input_mode = input("manual(1) file(2): ")
@@ -317,7 +354,10 @@ def main():
         exit()
 
     while True:
-        print('1. login\n2. logout\n3. ping\n4. info\n0. exit')
+        if not drop.is_connect:
+            print('1. login\n2. logout\n3. ping\n4. info\n0. exit')
+        elif drop.is_connect:
+            print('1. login\n2. logout\n3. ping\n4. info\n5.exec\n0. exit')
 
         commend = input("> ")
         if commend == '\n':
@@ -327,10 +367,13 @@ def main():
             '1': main_login,
             '2': main_logout,
             '3': main_ping,
-            '4': main_info
+            '4': main_info,
+            '5': main_exec,
         }.get(commend)
 
         if commend == '0':
+            if drop.is_connect:
+                drop.logout()
             exit(0)
         else:
             fun(drop)

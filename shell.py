@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 # from droplet import droplet
 
 
+# useless, droplet class has a ping member method
 def ping(server):
     '''return the ping value one time
     argument: server (droplet class)
@@ -44,11 +46,12 @@ def get_shell_size():
     $LINES" and "echo $COLUMNS" can return the
     size of this shell
     '''
-    lines = int(os.popen("echo $LINES", "r").readline())
-    columns = int(os.popen("echo $COLUMNS", "r").readline())
+    lines = int(os.popen("echo $LINES", "r").readline()[:-1])
+    columns = int(os.popen("echo $COLUMNS", "r").readline()[:-1])
     return lines, columns
 
 
+# useless, droplet class has a location attribute
 def get_location_info(server):
     '''
     argument: server (droplet class)
@@ -67,3 +70,8 @@ def get_location_info(server):
     str_isp = str_info[index1: index2]
 
     return str_location, str_isp
+
+
+if __name__ == "__main__":
+    print(os.get_terminal_size().columns)
+    exit()
