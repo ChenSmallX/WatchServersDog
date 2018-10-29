@@ -18,7 +18,7 @@ class droplet(object):
             password(str)
 
     mathod:
-        name, ip, password
+        name, ip, password, and so on
     '''
 
     # set a limitation to droplet jest can have certain attributions
